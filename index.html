@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	
+	<meta charset="utf-8" />
+	<title>Belgium national identification number validator</title>
+	<meta name="description" content="" />
+	
+	<style type="text/css" media="screen">
+		
+		body, input {
+			font: 13px/1.5em Arial, sans-serif;
+		}
+		
+		#id_number {
+			width: 7em;
+			margin-right: 0.5em;
+		}
+		
+	</style>
+	
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js"></script>
+	
+</head>
+<body>
+	
+	<form id="id_validator" action="#">
+		<p>
+			<label for="id_number">Identification number:</label>
+			<input type="text" name="id_number" value="84122031560" id="id_number" maxlength="11" />
+			<strong id="validity"></strong>
+		</p>
+		<p>
+			<input type="submit" value="Validate &rarr;"/>
+		</p>
+	</form>
+	
+	<script type="text/javascript">
+		
+		jQuery(function($){
+			
+			function validateIdentificationNumber(number) {
+				// Be sure to have something to test
+				if (!number) {
+					return false;
+				}
+				
+				// Only take the first 11 characters
+				number = number.substr(0, 11);
+				
+				// Test if we have well a 11-digit string
+				if (!/\d{11}/.test(number)) {
+					return false;
+				}
+				
+				// Numbers we're going to check against
+				var to_control = number.substr(0, 9);
+				
+				// Verification number
+				var control = number.substr(9, 2);
+				
+				// Date parsing
+				var date = number.substr(0, 6);
+				var date_year = parseInt(date.substr(0, 2), 10);
+				var date_month = parseInt(date.substr(2, 2), 10);
+				var date_day = parseInt(date.substr(4, 2), 10);
+				var today_year = parseInt(new Date().getFullYear().toString().substr(2, 2), 10);
+				
+				// Simple date check
+				if (date_month < 1 || date_month > 12 || date_day < 1 || date_day > 31) {
+					return false;
+				}
+				
+				// Add '2' before if date after 1st Jan 2000
+				if (date_year < today_year) {
+					to_control = '2' + to_control.toString();
+				}
+				
+				// Modulo calculation
+				to_control = parseInt(to_control, 10);
+				var modulo = 97 - (to_control % 97);
+				modulo = Math.floor(modulo);
+				modulo = modulo < 10 ? '0' + modulo : '' + modulo;
+				
+				// Final test
+				return control === modulo;
+			}
+			
+			
+			$('#id_validator').submit(function(event){
+				event.preventDefault();
+				var input = $('#id_number').val();
+				var valid = validateIdentificationNumber(input);
+				$('#validity').text(valid ? 'valid' : 'invalid');
+			});
+			
+		})
+		
+		
+		
+	</script>
+	
+</body>
+</html>
